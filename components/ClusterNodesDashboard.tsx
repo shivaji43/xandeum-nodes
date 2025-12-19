@@ -127,42 +127,32 @@ export default function ClusterNodesDashboard() {
         if (uniqueIps.length === 0) return;
 
         // Batch request to ip-api.com (supports up to 100 per batch)
-        const batchSize = 100;
-        const batches = [];
-        for (let i = 0; i < uniqueIps.length; i += batchSize) {
-          batches.push(uniqueIps.slice(i, i + batchSize));
-        }
-
         try {
           const allPoints: { lat: number; lon: number; label?: string; node?: ClusterNode }[] = [];
 
-          for (const batch of batches) {
-            const response = await fetch('http://ip-api.com/batch', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(batch.map(ip => ({ query: ip, fields: "lat,lon,query" }))),
-            });
+          // Send all IPs to our proxy - it handles batching and caching
+          const response = await fetch('/api/geo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(uniqueIps),
+          });
 
-            if (response.ok) {
-              const data = await response.json();
-              const points = data
-                .filter((item: any) => item.lat && item.lon)
-                .map((item: any) => {
-                  // Find the first node associated with this IP
-                  const associatedNode = nodes.find(n => n.address?.startsWith(item.query));
-                  return {
-                    lat: item.lat,
-                    lon: item.lon,
-                    label: item.query,
-                    node: associatedNode
-                  };
-                });
-              allPoints.push(...points);
-            }
-            // Add a small delay between batches to be nice to the API
-            await new Promise(resolve => setTimeout(resolve, 500)); 
+          if (response.ok) {
+            const data = await response.json();
+            const points = data
+              .map((item: any) => {
+                // Find the first node associated with this IP
+                const associatedNode = nodes.find(n => n.address?.startsWith(item.query));
+                return {
+                  lat: item.lat,
+                  lon: item.lon,
+                  label: item.query,
+                  node: associatedNode
+                };
+              });
+            allPoints.push(...points);
           }
           
           setMapPoints(allPoints);
@@ -174,6 +164,7 @@ export default function ClusterNodesDashboard() {
       fetchGeoLocations();
     }
   }, [nodes]);
+
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);

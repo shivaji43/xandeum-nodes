@@ -1,33 +1,66 @@
 import { NextResponse } from 'next/server';
+import http from 'http';
+
+export async function POST() {
+  return new Promise((resolve) => {
+    const postData = JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'get-pods-with-stats',
+      id: 1
+    });
+
+    const options = {
+      hostname: '216.234.134.5',
+      port: 6000,
+      path: '/rpc',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = http.request(options, (res) => {
+      let data = '';
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        try {
+          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+             const json = JSON.parse(data);
+             resolve(NextResponse.json(json));
+          } else {
+             resolve(NextResponse.json(
+                { error: `RPC call failed: ${res.statusCode} ${res.statusMessage}` },
+                { status: res.statusCode || 500 }
+             ));
+          }
+        } catch (e) {
+          console.error('Error parsing RPC response:', e);
+          resolve(NextResponse.json(
+            { error: 'Failed to parse RPC response' },
+            { status: 500 }
+          ));
+        }
+      });
+    });
+
+    req.on('error', (e) => {
+      console.error('Error in pnodes API:', e);
+      resolve(NextResponse.json(
+        { error: `Failed to fetch data from RPC: ${e.message}` },
+        { status: 500 }
+      ));
+    });
+
+    req.write(postData);
+    req.end();
+  });
+}
 
 export async function GET() {
-  try {
-    const response = await fetch('https://api.devnet.xandeum.com:8899', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getClusterNodes',
-        params: []
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch cluster nodes: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    return NextResponse.json({
-      success: true,
-      data: data.result
-    });
-  } catch (error) {
-    console.error('Error fetching cluster nodes:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch cluster nodes' },
-      { status: 500 }
-    );
-  }
+    return POST();
 }

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import http from 'http';
 
-export async function POST() {
-  return new Promise((resolve) => {
+export async function POST(): Promise<NextResponse> {
+  return new Promise<NextResponse>((resolve) => {
     const postData = JSON.stringify({
       jsonrpc: '2.0',
       method: 'get-pods-with-stats',

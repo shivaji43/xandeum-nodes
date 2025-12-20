@@ -1,6 +1,6 @@
 'use client';
 
-import ClusterStats from '@/components/ClusterStats';
+import AdvancedNetworkStats from '@/components/AdvancedNetworkStats';
 import { useClusterData } from '@/hooks/useClusterData';
 import { RefreshCw, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,7 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        <ClusterStats nodes={nodes} geoData={mapPoints} />
+        <AdvancedNetworkStats nodes={nodes} geoData={mapPoints} />
       </div>
     </div>
   );

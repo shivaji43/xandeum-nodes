@@ -33,6 +33,7 @@ import WorldMap from './WorldMap';
 import { useClusterData } from '@/hooks/useClusterData';
 import HomeStats from './HomeStats';
 
+
 export default function ClusterNodesDashboard() {
   const { nodes, loading, error, lastUpdated, dataSource, mapPoints, refresh } = useClusterData();
   
@@ -182,6 +183,8 @@ export default function ClusterNodesDashboard() {
 
         {/* Home Stats */}
         <HomeStats nodes={nodes} />
+
+
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

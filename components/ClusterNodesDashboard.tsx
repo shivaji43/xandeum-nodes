@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { ClusterNode, ApiResponse } from '../types/cluster';
+import { useState, useMemo } from 'react';
+import { ClusterNode } from '../types/cluster';
 import { 
   Table, 
   TableBody, 
@@ -30,141 +30,20 @@ import {
 import { ModeToggle } from './mode-toggle';
 
 import WorldMap from './WorldMap';
-
-
+import { useClusterData } from '@/hooks/useClusterData';
+import HomeStats from './HomeStats';
 
 export default function ClusterNodesDashboard() {
-  const [nodes, setNodes] = useState<ClusterNode[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
-  const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [dataSource, setDataSource] = useState<string>('');
+  const { nodes, loading, error, lastUpdated, dataSource, mapPoints, refresh } = useClusterData();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [versionFilter, setVersionFilter] = useState<string>('all');
   const [sortConfig, setSortConfig] = useState<{ key: keyof ClusterNode; direction: 'asc' | 'desc' } | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [mapPoints, setMapPoints] = useState<{ lat: number; lon: number; label?: string; node?: ClusterNode }[]>([]);
   const [selectedNode, setSelectedNode] = useState<ClusterNode | null>(null);
   const [publicFilter, setPublicFilter] = useState<string>('all');
-
-
-
-  const fetchNodes = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/pnodes');
-      const result: ApiResponse = await response.json();
-      
-      // The API returns { result: { pods: [...], total_count: ... } }
-      // But our proxy might be returning just the inner part or the full RPC.
-      // Based on user input:
-      // { "result": { "pods": [...], "total_count": 226 } }
-      // Wait, the user pasted:
-      // { "result": { "pods": [...], "total_count": 226 } }
-      // So it is result.pods directly if the proxy returns the body of the RPC response.
-      
-      // Let's handle both potential structures to be safe, or just the one the user showed.
-      // The user showed:
-      // { "result": { "pods": [...] } }
-      
-      const podsData = result.result?.pods || result.result?.value?.pods;
-
-      if (podsData) {
-        const mappedNodes = podsData.map((pod: any) => ({
-          ...pod,
-          // Map RPC fields to UI fields
-          gossip: pod.address,
-          storageCommitted: pod.storage_committed,
-          storageUsagePercent: pod.storage_usage_percent,
-          storageUsed: pod.storage_used,
-          rpcPort: pod.rpc_port,
-          isPublic: pod.is_public,
-          lastSeenTimestamp: pod.last_seen_timestamp,
-          isPNode: true, // All nodes from this RPC are pNodes (pods)
-          shredVersion: 0 // Not provided in new RPC
-        }));
-
-        // Deduplicate nodes by pubkey
-        const uniqueNodes = Array.from(new Map(mappedNodes.map((node: any) => [node.pubkey, node])).values());
-        
-        setNodes(uniqueNodes as ClusterNode[]);
-        
-
-
-        setError('');
-        setLastUpdated(new Date().toLocaleTimeString());
-        setDataSource('pRPC via 216.234.134.5');
-      } else if (result.error) {
-        setError(result.error);
-      } else {
-        setError('Failed to fetch cluster nodes: Invalid response format');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Network error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNodes();
-    const intervalId = setInterval(fetchNodes, 30000); // 30s auto-refresh
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    if (nodes.length > 0) {
-      const fetchGeoLocations = async () => {
-        // Extract unique IPs from gossip addresses
-        const uniqueIps = Array.from(new Set(
-          nodes
-            .map(n => n.address?.split(':')[0])
-            .filter((ip): ip is string => !!ip && ip !== '127.0.0.1' && ip !== '0.0.0.0')
-        ));
-
-        if (uniqueIps.length === 0) return;
-
-        // Batch request to ip-api.com (supports up to 100 per batch)
-        try {
-          const allPoints: { lat: number; lon: number; label?: string; node?: ClusterNode }[] = [];
-
-          // Send all IPs to our proxy - it handles batching and caching
-          const response = await fetch('/api/geo', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(uniqueIps),
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            const points = data
-              .map((item: any) => {
-                // Find the first node associated with this IP
-                const associatedNode = nodes.find(n => n.address?.startsWith(item.query));
-                return {
-                  lat: item.lat,
-                  lon: item.lon,
-                  label: item.query,
-                  node: associatedNode
-                };
-              });
-            allPoints.push(...points);
-          }
-          
-          setMapPoints(allPoints);
-        } catch (error) {
-          console.error("Failed to fetch geolocations:", error);
-        }
-      };
-
-      fetchGeoLocations();
-    }
-  }, [nodes]);
-
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -258,7 +137,7 @@ export default function ClusterNodesDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchNodes} variant="outline" className="w-full">
+            <Button onClick={refresh} variant="outline" className="w-full">
               Retry Connection
             </Button>
           </CardContent>
@@ -284,7 +163,7 @@ export default function ClusterNodesDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button onClick={fetchNodes} variant="outline" disabled={loading}>
+            <Button onClick={refresh} variant="outline" disabled={loading}>
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
@@ -300,6 +179,9 @@ export default function ClusterNodesDashboard() {
             }
           }}
         />
+
+        {/* Home Stats */}
+        <HomeStats nodes={nodes} />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -599,7 +481,6 @@ export default function ClusterNodesDashboard() {
                     </div>
                   </div>
                   
-
                 </div>
               </div>
             </CardContent>

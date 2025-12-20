@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 // Simple in-memory cache
-const geoCache = new Map<string, { lat: number; lon: number }>();
+const geoCache = new Map<string, { lat: number; lon: number; country?: string; city?: string }>();
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    const results: { query: string; lat: number; lon: number }[] = [];
+    const results: { query: string; lat: number; lon: number; country?: string; city?: string }[] = [];
     const missingIps: string[] = [];
 
     // Check cache first
@@ -35,15 +35,21 @@ export async function POST(request: Request) {
           const response = await fetch('http://ip-api.com/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(batch.map(ip => ({ query: ip, fields: "lat,lon,query" })))
+            body: JSON.stringify(batch.map(ip => ({ query: ip, fields: "lat,lon,country,city,query" })))
           });
 
           if (response.ok) {
             const data = await response.json();
             data.forEach((item: any) => {
               if (item.lat && item.lon) {
-                geoCache.set(item.query, { lat: item.lat, lon: item.lon });
-                results.push({ query: item.query, lat: item.lat, lon: item.lon });
+                const geoData = { 
+                  lat: item.lat, 
+                  lon: item.lon,
+                  country: item.country,
+                  city: item.city
+                };
+                geoCache.set(item.query, geoData);
+                results.push({ query: item.query, ...geoData });
               }
             });
           }

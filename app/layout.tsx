@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   description: "Xandeum pNode Explorer",
 };
 
+import { AppSidebar } from "@/components/AppSidebar";
+import { WalletContextProvider } from "@/components/WalletContextProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,7 +37,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <WalletContextProvider>
+            <div className="flex h-screen overflow-hidden">
+              <AppSidebar />
+              <main className="flex-1 overflow-y-auto bg-background">
+                {children}
+              </main>
+            </div>
+          </WalletContextProvider>
         </ThemeProvider>
       </body>
     </html>

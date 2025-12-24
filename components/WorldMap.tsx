@@ -10,7 +10,7 @@ interface MapPoint {
   lat: number;
   lon: number;
   label?: string;
-  node?: any; // ClusterNode
+  nodes?: any[]; // ClusterNode[]
 }
 
 interface WorldMapProps {

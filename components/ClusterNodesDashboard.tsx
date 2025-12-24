@@ -45,6 +45,21 @@ export default function ClusterNodesDashboard() {
   const itemsPerPage = 10;
   const [selectedNode, setSelectedNode] = useState<ClusterNode | null>(null);
   const [publicFilter, setPublicFilter] = useState<string>('all');
+  const [selectedNodes, setSelectedNodes] = useState<ClusterNode[] | null>(null);
+
+  const handleNodeSelect = (node: ClusterNode) => {
+    setSelectedNode(node);
+    // Keep selectedNodes for "Back" functionality if it was a multi-selection
+  };
+
+  const handleBackToCluster = () => {
+    setSelectedNode(null);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedNode(null);
+    setSelectedNodes(null);
+  };
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -147,6 +162,8 @@ export default function ClusterNodesDashboard() {
     );
   }
 
+
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -175,8 +192,14 @@ export default function ClusterNodesDashboard() {
         <WorldMap 
           points={mapPoints} 
           onPointClick={(point) => {
-            if (point.node) {
-              setSelectedNode(point.node);
+            if (point.nodes && point.nodes.length > 0) {
+              if (point.nodes.length === 1) {
+                setSelectedNode(point.nodes[0]);
+                setSelectedNodes(null);
+              } else {
+                setSelectedNodes(point.nodes);
+                setSelectedNode(null);
+              }
             }
           }}
         />
@@ -223,10 +246,12 @@ export default function ClusterNodesDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Network Health</CardTitle>
-              <Activity className="h-4 w-4 text-emerald-500" />
+              <Activity className={`h-4 w-4 ${error ? 'text-destructive' : 'text-emerald-500'}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-500">Online</div>
+              <div className={`text-2xl font-bold ${error ? 'text-destructive' : 'text-emerald-500'}`}>
+                {error ? 'Offline' : (nodes.length > 0 ? 'Online' : 'Connecting...')}
+              </div>
               {/* <p className="text-xs text-muted-foreground">Devnet is active</p> */}
             </CardContent>
           </Card>
@@ -313,7 +338,10 @@ export default function ClusterNodesDashboard() {
                   <TableRow 
                     key={node.pubkey} 
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => setSelectedNode(node)}
+                    onClick={() => {
+                      setSelectedNode(node);
+                      setSelectedNodes(null);
+                    }}
                   >
                     <TableCell className="font-medium text-muted-foreground">
                       {(currentPage - 1) * itemsPerPage + index + 1}
@@ -398,16 +426,75 @@ export default function ClusterNodesDashboard() {
 
       </div>
 
-      {/* Node Details Modal */}
-      {selectedNode && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedNode(null)}>
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      {/* Node Selection Modal (Cluster View) */}
+      {selectedNodes && !selectedNode && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <CardHeader className="flex flex-row items-center justify-between sticky top-0 bg-card z-10 border-b">
               <div>
-                <CardTitle className="text-xl">Node Details</CardTitle>
-                <p className="text-sm text-muted-foreground font-mono mt-1">{selectedNode.address}</p>
+                <CardTitle className="text-xl">Cluster Nodes</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {selectedNodes.length} nodes at this location
+                </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedNode(null)}>
+              <Button variant="ghost" size="icon" onClick={handleCloseModal}>
+                <span className="text-xl">&times;</span>
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {selectedNodes.map((node) => (
+                  <div 
+                    key={node.pubkey} 
+                    className="p-4 hover:bg-muted/50 cursor-pointer flex items-center justify-between"
+                    onClick={() => handleNodeSelect(node)}
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-medium">
+                          {(node.pubkey || 'Unknown').slice(0, 8)}...{(node.pubkey || '').slice(-8)}
+                        </span>
+                        {node.isPNode && (
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 border-emerald-500 text-emerald-500">
+                            pNode
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground font-mono">
+                        {node.address}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        {node.version || 'Unknown'}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Node Details Modal */}
+      {selectedNode && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <CardHeader className="flex flex-row items-center justify-between sticky top-0 bg-card z-10 border-b">
+              <div className="flex items-center gap-2">
+                {selectedNodes && (
+                  <Button variant="ghost" size="icon" onClick={handleBackToCluster} className="mr-2">
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
+                )}
+                <div>
+                  <CardTitle className="text-xl">Node Details</CardTitle>
+                  <p className="text-sm text-muted-foreground font-mono mt-1">{selectedNode.address}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleCloseModal}>
                 <span className="text-xl">&times;</span>
               </Button>
             </CardHeader>

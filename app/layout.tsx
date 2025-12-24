@@ -36,6 +36,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          themes={["light", "dark", "xandeum"]}
         >
           <WalletContextProvider>
             <div className="flex h-screen overflow-hidden">

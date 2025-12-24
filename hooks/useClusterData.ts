@@ -9,7 +9,7 @@ export function useClusterData() {
   const [error, setError] = useState<string>('');
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [dataSource, setDataSource] = useState<string>('');
-  const [mapPoints, setMapPoints] = useState<{ lat: number; lon: number; label?: string; node?: ClusterNode; country?: string; city?: string }[]>([]);
+  const [mapPoints, setMapPoints] = useState<{ lat: number; lon: number; label?: string; nodes?: ClusterNode[]; country?: string; city?: string }[]>([]);
 
   const fetchNodes = async () => {
     try {
@@ -74,7 +74,7 @@ export function useClusterData() {
 
         // Batch request to ip-api.com (supports up to 100 per batch)
         try {
-          const allPoints: { lat: number; lon: number; label?: string; node?: ClusterNode; country?: string; city?: string }[] = [];
+          const allPoints: { lat: number; lon: number; label?: string; nodes?: ClusterNode[]; country?: string; city?: string }[] = [];
 
           // Send all IPs to our proxy - it handles batching and caching
           const response = await fetch('/api/geo', {
@@ -89,13 +89,13 @@ export function useClusterData() {
             const data = await response.json();
             const points = data
               .map((item: any) => {
-                // Find the first node associated with this IP
-                const associatedNode = nodes.find(n => n.address?.startsWith(item.query));
+                // Find all nodes associated with this IP
+                const associatedNodes = nodes.filter(n => n.address?.startsWith(item.query));
                 return {
                   lat: item.lat,
                   lon: item.lon,
                   label: item.query,
-                  node: associatedNode,
+                  nodes: associatedNodes, // Changed from single node to array
                   country: item.country,
                   city: item.city
                 };

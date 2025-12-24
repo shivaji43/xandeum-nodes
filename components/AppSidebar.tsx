@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Network, Settings, Box, Coins, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Network, Settings, Box, Coins, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import { FaGlobe, FaDiscord } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ export function AppSidebar() {
   const links = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Network', href: '/network', icon: Network },
+    { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Trade', href: '/trade', icon: Coins },
     // { name: 'Nodes', href: '/nodes', icon: Box },
     // { name: 'Settings', href: '/settings', icon: Settings },

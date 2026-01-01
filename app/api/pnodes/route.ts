@@ -10,7 +10,7 @@ export async function POST(): Promise<NextResponse> {
     });
 
     const options = {
-      hostname: '216.234.134.5',
+      hostname: ['173.212.207.32', '45.151.122.77', '84.21.171.111', '173.249.54.191'][Math.floor(Math.random() * 4)],
       port: 6000,
       path: '/rpc',
       method: 'POST',

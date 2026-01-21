@@ -92,7 +92,8 @@ export default function ClusterNodesDashboard({
     return nodes.filter(node => {
       const matchesSearch = 
         (node.pubkey?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        node.version?.toLowerCase().includes(searchQuery.toLowerCase());
+        (node.version?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (node.address?.toLowerCase() || '').includes(searchQuery.toLowerCase());
       
       const matchesVersion = versionFilter === 'all' || node.version === versionFilter;
       const matchesPublic = publicFilter === 'all' || (publicFilter === 'public' ? node.is_public : !node.is_public);
@@ -297,7 +298,7 @@ export default function ClusterNodesDashboard({
               <div className="relative w-full">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by Pubkey or Version..."
+                  placeholder="Search by Pubkey, Version, or Gossip..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8"

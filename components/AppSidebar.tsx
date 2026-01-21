@@ -105,7 +105,7 @@ export function AppSidebar() {
             <FaXTwitter className="h-5 w-5" />
             <span className="sr-only">Twitter</span>
           </Link>
-          <Link href="https://discord.gg/uqRSmmM5m" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="https://discord.com/invite/mGAxAuwnR9" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
             <FaDiscord className="h-5 w-5" />
             <span className="sr-only">Discord</span>
           </Link>

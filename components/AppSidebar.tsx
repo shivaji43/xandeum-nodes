@@ -9,10 +9,13 @@ import { FaGlobe, FaDiscord } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useClusterData } from '@/hooks/useClusterData';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { nodes, error } = useClusterData();
+  const isOnline = !error && nodes.length > 0;
 
   const links = [
     { name: 'Home', href: '/', icon: Home },
@@ -78,9 +81,21 @@ export function AppSidebar() {
         })}
       </div>
 
+      <div className={cn("px-4 pb-2", isCollapsed && "px-2")}>
+        <div className={cn("flex items-center gap-2 justify-center py-2", isCollapsed ? "flex-col" : "flex-row")}>
+            <div className={cn("h-2 w-2 rounded-full", isOnline ? "bg-emerald-500" : "bg-red-500 animate-pulse")} />
+            {!isCollapsed && (
+              <span className={cn("text-xs font-medium", isOnline ? "text-emerald-500" : "text-destructive")}>
+                {isOnline ? "Network Online" : "Offline"}
+              </span>
+            )}
+        </div>
+      </div>
+
       <div className={cn("p-4 border-t flex flex-col gap-4", isCollapsed && "items-center")}>
+
         <div className={cn("flex gap-4", isCollapsed ? "flex-col" : "justify-center")}>
-          <Link href="https://www.xandeum.network/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="https://www.xandeum.network/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
             <FaGlobe className="h-5 w-5" />
             <span className="sr-only">Website</span>
           </Link>

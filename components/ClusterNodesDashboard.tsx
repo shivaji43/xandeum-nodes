@@ -25,7 +25,8 @@ import {
   Check, 
   ArrowUpDown,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Database,
 } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 
@@ -240,12 +241,14 @@ export default function ClusterNodesDashboard({
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Versions</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total Storage Committed</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{uniqueVersions.length}</div>
-              <p className="text-xs text-muted-foreground">Distinct versions</p>
+              <div className="text-2xl font-bold">
+                {formatBytes(nodes.reduce((acc, node) => acc + (node.storageCommitted || 0), 0))}
+              </div>
+              <p className="text-xs text-muted-foreground">Across all nodes</p>
             </CardContent>
           </Card>
           <Card>
@@ -273,14 +276,14 @@ export default function ClusterNodesDashboard({
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Network Health</CardTitle>
-              <Activity className={`h-4 w-4 ${error ? 'text-destructive' : 'text-emerald-500'}`} />
+              <CardTitle className="text-sm font-medium">Average Storage / Pod</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${error ? 'text-destructive' : 'text-emerald-500'}`}>
-                {error ? 'Offline' : (nodes.length > 0 ? 'Online' : 'Connecting...')}
+              <div className="text-2xl font-bold">
+                {formatBytes(nodes.length > 0 ? nodes.reduce((acc, node) => acc + (node.storageCommitted || 0), 0) / nodes.length : 0)}
               </div>
-              {/* <p className="text-xs text-muted-foreground">Devnet is active</p> */}
+              <p className="text-xs text-muted-foreground">Per participating node</p>
             </CardContent>
           </Card>
 

@@ -186,6 +186,7 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -204,6 +205,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 12, fill: 'var(--foreground)'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                   cursor={{fill: 'var(--muted)', opacity: 0.2}}
                 />
                 <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]}>
@@ -228,6 +231,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <YAxis tick={{fill: 'var(--foreground)'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                   cursor={{fill: 'var(--muted)', opacity: 0.2}}
                 />
                 <Bar dataKey="count" fill="#82ca9d" radius={[4, 4, 0, 0]} />
@@ -248,6 +253,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <YAxis tick={{fill: 'var(--foreground)'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
                 <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
               </AreaChart>
@@ -279,6 +286,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 </Pie>
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
                 <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: 'var(--foreground)' }}/>
               </PieChart>
@@ -298,6 +307,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <YAxis dataKey="name" type="category" width={80} tick={{fontSize: 10, fontFamily: 'monospace', fill: 'var(--foreground)'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                   cursor={{fill: 'var(--muted)', opacity: 0.2}}
                 />
                 <Bar dataKey="value" fill="#ffc658" radius={[0, 4, 4, 0]}>
@@ -323,6 +334,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <Tooltip 
                   cursor={{ strokeDasharray: '3 3' }} 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
                 <Scatter name="Nodes" data={correlationData} fill="#8884d8" />
               </ScatterChart>
@@ -379,6 +392,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
               >
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
               </Treemap>
             </ResponsiveContainer>
@@ -397,6 +412,8 @@ export default function AdvancedNetworkStats({ nodes, geoData }: AdvancedNetwork
                 <YAxis tick={{fill: 'var(--foreground)'}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                   cursor={{fill: 'var(--muted)', opacity: 0.2}}
                 />
                 <Bar dataKey="value" fill="#ff8042" radius={[4, 4, 0, 0]} />

@@ -174,7 +174,9 @@ export default function TokenStats() {
                   <XAxis dataKey="time" hide />
                   <YAxis domain={['auto', 'auto']} hide />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
+                    labelStyle={{ color: 'var(--foreground)' }}
                     formatter={(value: number | undefined) => [value ? `$${value.toFixed(4)}` : 'N/A', 'Price']}
                   />
                   <Area type="monotone" dataKey="price" stroke="#8884d8" fillOpacity={1} fill="url(#colorPrice)" />
@@ -195,8 +197,10 @@ export default function TokenStats() {
                 <BarChart data={performanceData}>
                   <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                     cursor={{fill: 'transparent'}}
-                     contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                     cursor={{fill: 'var(--muted)', opacity: 0.2}}
+                     contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                     itemStyle={{ color: 'var(--foreground)' }}
+                     labelStyle={{ color: 'var(--foreground)' }}
                   />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                     {performanceData.map((entry, index) => (
@@ -224,8 +228,10 @@ export default function TokenStats() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                    cursor={{fill: 'var(--muted)', opacity: 0.2}}
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
+                    labelStyle={{ color: 'var(--foreground)' }}
                     formatter={(value: number | undefined) => [value ? `$${value.toLocaleString()}` : 'N/A', 'Volume']}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32} />
@@ -247,8 +253,10 @@ export default function TokenStats() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
-                    cursor={{fill: 'transparent'}}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+                    cursor={{fill: 'var(--muted)', opacity: 0.2}}
+                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    itemStyle={{ color: 'var(--foreground)' }}
+                    labelStyle={{ color: 'var(--foreground)' }}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32} />
                 </BarChart>

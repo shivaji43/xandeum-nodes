@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Network, Settings, Box, Coins, ChevronLeft, ChevronRight, Trophy, Star } from 'lucide-react';
+import { Home, Network, Settings, Box, Coins, ChevronLeft, ChevronRight, Trophy, Star, Sparkles } from 'lucide-react';
 import { FaGlobe, FaDiscord } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ export function AppSidebar() {
     { name: 'Network', href: '/network', icon: Network },
     { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Watchlist', href: '/watchlist', icon: Star },
+    { name: 'XAND Bot', href: '/chat', icon: Sparkles },
     { name: 'Trade', href: '/trade', icon: Coins },
     // { name: 'Nodes', href: '/nodes', icon: Box },
     // { name: 'Settings', href: '/settings', icon: Settings },
@@ -27,7 +28,7 @@ export function AppSidebar() {
   return (
     <div 
       className={cn(
-        "flex flex-col h-screen border-r bg-card text-card-foreground transition-all duration-300 ease-in-out relative",
+        "flex flex-col h-screen border-r bg-card text-card-foreground transition-all duration-300 ease-in-out relative chat-font",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -65,7 +66,11 @@ export function AppSidebar() {
                 )}
                 title={isCollapsed ? link.name : undefined}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                {link.name === 'XAND Bot' ? (
+                  <img src="/xandeum.png" alt="XAND" className="h-6 w-6 shrink-0" />
+                ) : (
+                  <Icon className="h-6 w-6 shrink-0" />
+                )}
                 {!isCollapsed && <span className="overflow-hidden whitespace-nowrap">{link.name}</span>}
               </Button>
             </Link>

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getNetworkStats } from '@/lib/bot-data';
+import { getNetworkStats, getPodCredits } from '@/lib/bot-data';
 
 // System prompt
 const SYSTEM_PROMPT = `You are the XAND Bot, an AI assistant for the Xandeum Network.
@@ -10,6 +10,7 @@ ALWAYS use this tool to answer questions about:
 - Geographic distribution (Top countries, cities)
 - Versions and Storage usage
 - Public vs Private nodes
+- Pod Credits (check credits for specific pods or list top pods)
 
 Definitions:
 - "Online": Node seen within the last 5 minutes.
@@ -47,6 +48,17 @@ export async function POST(req: Request) {
         function: {
           name: "get_network_stats",
           description: "Get comprehensive Xandeum network statistics including health score, top countries, cities, online/offline counts, etc.",
+          parameters: {
+            type: "object",
+            properties: {},
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "get_pod_credits",
+          description: "Get the current credit balance for all pods. Use this to answer questions about specific pod credits or to list pods with the most credits.",
           parameters: {
             type: "object",
             properties: {},
@@ -104,6 +116,24 @@ export async function POST(req: Request) {
               role: "tool",
               name: "get_network_stats",
               content: `Error fetching data: ${e.message}`,
+            });
+          }
+        } else if (toolCall.function.name === 'get_pod_credits') {
+          try {
+            const credits = await getPodCredits();
+            
+            functionResponseMessages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "get_pod_credits",
+              content: JSON.stringify(credits),
+            });
+          } catch (e: any) {
+            functionResponseMessages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "get_pod_credits",
+              content: `Error fetching credits: ${e.message}`,
             });
           }
         }

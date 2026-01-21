@@ -14,6 +14,16 @@ export interface NetworkStats {
   lastUpdated: string;
 }
 
+export interface PodCredit {
+  credits: number;
+  pod_id: string;
+}
+
+export interface CreditsResponse {
+  pods_credits: PodCredit[];
+  status: string;
+}
+
 // In-memory cache for geo data (mirrors api/geo/route.ts cache)
 const geoCache = new Map<string, { country?: string; city?: string }>();
 
@@ -195,3 +205,20 @@ export async function getNetworkStats(): Promise<NetworkStats> {
     lastUpdated: new Date().toISOString()
   };
 }
+
+export async function getPodCredits(): Promise<CreditsResponse> {
+  try {
+    const response = await fetch('https://podcredits.xandeum.network/api/pods-credits');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch pod credits: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching pod credits:', error);
+    // Return empty structure or rethrow depending on desired behavior. 
+    // For now, rethrowing so the helpful bot can report the error.
+    throw error;
+  }
+}
+

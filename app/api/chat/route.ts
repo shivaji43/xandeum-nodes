@@ -18,6 +18,17 @@ Definitions:
 
 Answer concisely and professionally. Present the data clearly (e.g., using bullet points for countries).
 Current Date: ${new Date().toISOString()}
+
+Knowledge Base:
+- **Xandeum**: A scalable storage layer built natively on Solana, enabling "storage-enabled dApps" (sedApps).
+- **pNodes (Provider Nodes)**: Community-operated nodes that store data (exabytes capacity) and earn rewards.
+- **vNodes (Validator Nodes)**: Supervise pNodes and ensure data integrity.
+- **Technology**: Uses "Erasure Coding" (splitting files into shards) and cryptographic proofs (Poke, Peek, Prove) for security.
+- **XAND Token**: Native governance token.
+- **XandSOL**: Liquid staking token.
+- **Goal**: To solve the blockchain storage trilemma by offering decentralized, scalable storage with random access.
+
+Refuse to answer questions unrelated to Xandeum or general blockchain topics unless they connect back to Xandeum's context.
 `;
 
 export async function POST(req: Request) {

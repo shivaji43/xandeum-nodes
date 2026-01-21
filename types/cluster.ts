@@ -21,6 +21,7 @@ export interface ClusterNode {
   isPublic?: boolean;
   lastSeenTimestamp?: number;
   shredVersion?: number; // Not in new RPC, keeping for compatibility if needed or remove
+  status?: 'Online' | 'Offline';
 }
 
 export interface ApiResponse {

@@ -31,7 +31,8 @@ export function useClusterData() {
           isPublic: pod.is_public,
           lastSeenTimestamp: pod.last_seen_timestamp,
           isPNode: true, // All nodes from this RPC are pNodes (pods)
-          shredVersion: 0 // Not provided in new RPC
+          shredVersion: 0, // Not provided in new RPC
+          status: (Date.now() / 1000) - pod.last_seen_timestamp < 300 ? 'Online' : 'Offline'
         }));
 
         // Deduplicate nodes by pubkey

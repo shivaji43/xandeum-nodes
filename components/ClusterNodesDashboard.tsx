@@ -31,15 +31,27 @@ import { ModeToggle } from './mode-toggle';
 
 import WorldMap from './WorldMap';
 import { useClusterData } from '@/hooks/useClusterData';
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { Star } from 'lucide-react';
 import HomeStats from './HomeStats';
 
 
-export default function ClusterNodesDashboard() {
+export default function ClusterNodesDashboard({ 
+  onlyWatchlist = false,
+  hideMap = false,
+  hideStats = false
+}: { 
+  onlyWatchlist?: boolean;
+  hideMap?: boolean;
+  hideStats?: boolean;
+}) {
   const { nodes, loading, error, lastUpdated, dataSource, mapPoints, refresh } = useClusterData();
+  const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [versionFilter, setVersionFilter] = useState<string>('all');
-  const [sortConfig, setSortConfig] = useState<{ key: keyof ClusterNode; direction: 'asc' | 'desc' } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof ClusterNode; direction: 'asc' | 'desc' } | null>({ key: 'status', direction: 'desc' });
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -83,10 +95,12 @@ export default function ClusterNodesDashboard() {
       
       const matchesVersion = versionFilter === 'all' || node.version === versionFilter;
       const matchesPublic = publicFilter === 'all' || (publicFilter === 'public' ? node.is_public : !node.is_public);
+      const matchesStatus = statusFilter === 'all' || node.status === statusFilter;
+      const matchesWatchlist = !onlyWatchlist || isInWatchlist(node.pubkey);
 
-      return matchesSearch && matchesVersion && matchesPublic;
+      return matchesSearch && matchesVersion && matchesPublic && matchesStatus && matchesWatchlist;
     });
-  }, [nodes, searchQuery, versionFilter, publicFilter]);
+  }, [nodes, searchQuery, versionFilter, publicFilter, statusFilter, onlyWatchlist, watchlist]);
 
   const sortedNodes = useMemo(() => {
     if (!sortConfig) return filteredNodes;
@@ -165,7 +179,7 @@ export default function ClusterNodesDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-8 font-sans">
+    <div className="p-6 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
@@ -189,27 +203,30 @@ export default function ClusterNodesDashboard() {
         </div>
 
         {/* World Map */}
-        <WorldMap 
-          points={mapPoints} 
-          onPointClick={(point) => {
-            if (point.nodes && point.nodes.length > 0) {
-              if (point.nodes.length === 1) {
-                setSelectedNode(point.nodes[0]);
-                setSelectedNodes(null);
-              } else {
-                setSelectedNodes(point.nodes);
-                setSelectedNode(null);
+        {!hideMap && (
+          <WorldMap 
+            points={mapPoints} 
+            onPointClick={(point) => {
+              if (point.nodes && point.nodes.length > 0) {
+                if (point.nodes.length === 1) {
+                  setSelectedNode(point.nodes[0]);
+                  setSelectedNodes(null);
+                } else {
+                  setSelectedNodes(point.nodes);
+                  setSelectedNode(null);
+                }
               }
-            }
-          }}
-        />
+            }}
+          />
+        )}
 
         {/* Home Stats */}
-        <HomeStats nodes={nodes} />
+        {!hideStats && <HomeStats nodes={nodes} />}
 
 
 
         {/* Stats Cards */}
+        {!hideStats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -257,6 +274,7 @@ export default function ClusterNodesDashboard() {
           </Card>
 
         </div>
+        )}
 
         {/* Filters & Controls */}
         <div className="flex flex-col gap-4">
@@ -281,6 +299,17 @@ export default function ClusterNodesDashboard() {
                   <SelectItem value="all">All Visibility</SelectItem>
                   <SelectItem value="public">Public</SelectItem>
                   <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Online">Online</SelectItem>
+                  <SelectItem value="Offline">Offline</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -323,6 +352,7 @@ export default function ClusterNodesDashboard() {
                   </Button>
                 </TableHead>
                 <TableHead>Uptime</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Last Seen</TableHead>
               </TableRow>
             </TableHeader>
@@ -348,6 +378,19 @@ export default function ClusterNodesDashboard() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
+                         <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 mr-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (node.pubkey) toggleWatchlist(node.pubkey);
+                          }}
+                        >
+                          <Star 
+                            className={`h-4 w-4 ${isInWatchlist(node.pubkey) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} 
+                          />
+                        </Button>
                         <span className="font-mono text-xs truncate max-w-[120px]" title={node.pubkey}>
                           {(node.pubkey || 'Unknown').slice(0, 8)}...{(node.pubkey || '').slice(-8)}
                         </span>
@@ -389,6 +432,12 @@ export default function ClusterNodesDashboard() {
                     <TableCell className="text-xs font-mono text-muted-foreground">
                       {node.uptime ? formatUptime(node.uptime) : '-'}
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={node.status === 'Online' ? 'default' : 'destructive'} 
+                             className={node.status === 'Online' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-red-500 hover:bg-red-600'}>
+                        {node.status || 'Unknown'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right font-mono text-xs">
                       {node.lastSeenTimestamp ? new Date(node.lastSeenTimestamp * 1000).toLocaleString() : '-'}
                     </TableCell>
@@ -407,19 +456,90 @@ export default function ClusterNodesDashboard() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
+              title="First Page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">First Page</span>
+              <span className="text-xs">{'<<'}</span>
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              title="Previous Page"
+            >
+              <span className="sr-only">Previous Page</span>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {(() => {
+                const pages = [];
+                const maxVisiblePages = 5;
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                
+                if (endPage - startPage < maxVisiblePages - 1) {
+                  startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                }
+
+                if (startPage > 1) {
+                  pages.push(
+                    <span key="start-ellipsis" className="px-1 text-muted-foreground">...</span>
+                  );
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(
+                    <Button
+                      key={i}
+                      variant={currentPage === i ? "default" : "outline"}
+                      size="sm"
+                      className={`h-8 w-8 ${currentPage === i ? "" : "hover:bg-muted"}`}
+                      onClick={() => setCurrentPage(i)}
+                    >
+                      {i}
+                    </Button>
+                  );
+                }
+
+                if (endPage < totalPages) {
+                  pages.push(
+                    <span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>
+                  );
+                }
+                
+                return pages;
+              })()}
+            </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
+              title="Next Page"
             >
+              <span className="sr-only">Next Page</span>
               <ChevronRight className="h-4 w-4" />
+            </Button>
+             <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              title="Last Page"
+            >
+              <span className="sr-only">Last Page</span>
+              <span className="text-xs">{'>>'}</span>
             </Button>
           </div>
         </div>
@@ -561,6 +681,13 @@ export default function ClusterNodesDashboard() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg border-b pb-2">Status</h3>
                   <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Current Status:</span>
+                      <Badge variant={selectedNode.status === 'Online' ? 'default' : 'destructive'}
+                             className={selectedNode.status === 'Online' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-red-500 hover:bg-red-600'}>
+                        {selectedNode.status || 'Unknown'}
+                      </Badge>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Last Seen:</span>
                       <span className="font-mono">

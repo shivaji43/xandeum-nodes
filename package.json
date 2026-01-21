@@ -22,6 +22,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.37",
     "@solana/web3.js": "^1.98.4",
     "@types/d3-scale": "^4.0.9",
+    "@vercel/analytics": "^1.6.1",
     "@xandeum/web3.js": "^0.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -27,6 +27,8 @@ export const metadata: Metadata = {
 import { AppSidebar } from "@/components/AppSidebar";
 import { WalletContextProvider } from "@/components/WalletContextProvider";
 
+import { NetworkProvider } from "@/components/NetworkContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,15 +46,17 @@ export default function RootLayout({
           disableTransitionOnChange
           themes={["light", "dark", "xandeum"]}
         >
-          <WalletContextProvider>
-            <div className="flex h-screen overflow-hidden">
-              <AppSidebar />
-              <main className="flex-1 overflow-y-auto bg-background">
-                {children}
-                <Analytics />
-              </main>
-            </div>
-          </WalletContextProvider>
+          <NetworkProvider>
+            <WalletContextProvider>
+              <div className="flex h-screen overflow-hidden">
+                <AppSidebar />
+                <main className="flex-1 overflow-y-auto bg-background">
+                  {children}
+                  <Analytics />
+                </main>
+              </div>
+            </WalletContextProvider>
+          </NetworkProvider>
         </ThemeProvider>
       </body>
     </html>

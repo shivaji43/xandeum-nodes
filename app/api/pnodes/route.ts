@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
 import http from 'http';
 
-export async function POST(): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
+  const { searchParams } = new URL(request.url);
+  const network = searchParams.get('network') || 'mainnet';
+  
+  const hostnames = {
+    devnet: '173.212.207.32',
+    mainnet: '216.234.134.4'
+  };
+
+  const targetHost = hostnames[network as keyof typeof hostnames] || hostnames.devnet;
+
   return new Promise<NextResponse>((resolve) => {
     const postData = JSON.stringify({
       jsonrpc: '2.0',
@@ -10,7 +20,7 @@ export async function POST(): Promise<NextResponse> {
     });
 
     const options = {
-      hostname: ['173.212.207.32'][Math.floor(Math.random() * 1)],
+      hostname: targetHost,
       port: 6000,
       path: '/rpc',
       method: 'POST',
@@ -61,6 +71,6 @@ export async function POST(): Promise<NextResponse> {
   });
 }
 
-export async function GET() {
-    return POST();
+export async function GET(request: Request) {
+    return POST(request);
 }

@@ -46,7 +46,7 @@ export default function ClusterNodesDashboard({
   hideMap?: boolean;
   hideStats?: boolean;
 }) {
-  const { nodes, loading, error, lastUpdated, dataSource, mapPoints, refresh } = useClusterData();
+  const { nodes, loading, error, lastUpdated, dataSource, mapPoints, refresh, network } = useClusterData();
   const { watchlist, toggleWatchlist, isInWatchlist } = useWatchlist();
   
   const [searchQuery, setSearchQuery] = useState('');

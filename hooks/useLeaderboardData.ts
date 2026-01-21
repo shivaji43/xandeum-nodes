@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useNetwork } from '@/components/NetworkContext';
 
 export interface LeaderboardEntry {
   pod_id: string;
@@ -8,6 +9,7 @@ export interface LeaderboardEntry {
 }
 
 export function useLeaderboardData() {
+  const { network } = useNetwork();
   const [data, setData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -16,7 +18,7 @@ export function useLeaderboardData() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/leaderboard');
+        const response = await fetch(`/api/leaderboard?network=${network}`);
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard data');
         }
@@ -35,7 +37,7 @@ export function useLeaderboardData() {
     };
 
     fetchData();
-  }, []);
+  }, [network]);
 
   return { data, loading, error };
 }

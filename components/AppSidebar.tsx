@@ -10,11 +10,14 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useClusterData } from '@/hooks/useClusterData';
+import { useNetwork } from '@/components/NetworkContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { nodes, error } = useClusterData();
+  const { network, setNetwork } = useNetwork();
   const isOnline = !error && nodes.length > 0;
 
   const links = [
@@ -95,6 +98,21 @@ export function AppSidebar() {
       </div>
 
       <div className={cn("p-4 border-t flex flex-col gap-4", isCollapsed && "items-center")}>
+        
+        {!isCollapsed && (
+          <div className="w-full">
+            <p className="text-xs text-muted-foreground mb-2 px-1 uppercase tracking-wider font-semibold">Network</p>
+            <Select value={network} onValueChange={(val) => setNetwork(val as 'devnet' | 'mainnet')}>
+              <SelectTrigger className="w-full h-8 text-xs">
+                <SelectValue placeholder="Select Network" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="devnet">Devnet</SelectItem>
+                <SelectItem value="mainnet">Mainnet</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div className={cn("flex gap-4", isCollapsed ? "flex-col" : "justify-center")}>
             <Link href="https://www.xandeum.network/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">

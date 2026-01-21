@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { ClusterNode, ApiResponse } from '../types/cluster';
 
+import { useNetwork } from '@/components/NetworkContext';
+
 export function useClusterData() {
+  const { network } = useNetwork();
   const [nodes, setNodes] = useState<ClusterNode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -14,7 +17,7 @@ export function useClusterData() {
   const fetchNodes = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/pnodes');
+      const response = await fetch(`/api/pnodes?network=${network}`);
       const result: ApiResponse = await response.json();
       
       const podsData = result.result?.pods || result.result?.value?.pods;
@@ -40,7 +43,7 @@ export function useClusterData() {
         
         setError('');
         setLastUpdated(new Date().toLocaleTimeString());
-        setDataSource('pRPC via 216.234.134.5');
+        setDataSource(network === 'mainnet' ? 'Mainnet (216.234.134.4)' : 'Devnet (173.212.207.32)');
       } else if (result.error) {
         setError(result.error);
       } else {
@@ -57,7 +60,7 @@ export function useClusterData() {
     fetchNodes();
     const intervalId = setInterval(fetchNodes, 30000); // 30s auto-refresh
     return () => clearInterval(intervalId);
-  }, []);
+  }, [network]);
 
   useEffect(() => {
     if (nodes.length > 0) {
@@ -118,6 +121,7 @@ export function useClusterData() {
     error,
     lastUpdated,
     dataSource,
+    network, // Still returning network for convenience
     mapPoints,
     refresh: fetchNodes
   };

@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const network = searchParams.get('network') || 'mainnet';
+  
+  const url = network === 'mainnet' 
+    ? 'https://podcredits.xandeum.network/api/mainnet-pod-credits'
+    : 'https://podcredits.xandeum.network/api/pods-credits';
+
   try {
-    const response = await fetch('https://podcredits.xandeum.network/api/pods-credits', {
+    const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
       },

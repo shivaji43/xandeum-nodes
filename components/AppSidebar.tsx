@@ -23,7 +23,7 @@ export function AppSidebar() {
     { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Watchlist', href: '/watchlist', icon: Star },
     { name: 'XAND Bot', href: '/chat', icon: Sparkles },
-    { name: 'Trade', href: '/trade', icon: Coins },
+    { name: 'Trade / Stake', href: '/trade', icon: Coins },
     // { name: 'Nodes', href: '/nodes', icon: Box },
     // { name: 'Settings', href: '/settings', icon: Settings },
   ];

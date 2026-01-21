@@ -44,13 +44,15 @@ export function AppSidebar() {
         {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </Button>
 
-      <div className={cn("p-6 flex items-center gap-2 border-b", isCollapsed && "justify-center px-2")}>
-        <img src="/xandeum.png" alt="Xandeum" className="h-8 w-8 shrink-0" />
-        {!isCollapsed && (
-          <span className="font-bold text-lg tracking-tight overflow-hidden whitespace-nowrap transition-all duration-300">
-            Xandeum
-          </span>
-        )}
+      <div className={cn("p-6 border-b", isCollapsed && "justify-center px-2")}>
+        <Link href="/" className={cn("flex items-center gap-2", isCollapsed && "justify-center")}>
+          <img src="/xandeum.png" alt="Xandeum" className="h-8 w-8 shrink-0" />
+          {!isCollapsed && (
+            <span className="font-bold text-lg tracking-tight overflow-hidden whitespace-nowrap transition-all duration-300">
+              Xandeum
+            </span>
+          )}
+        </Link>
       </div>
       
       <div className="flex-1 py-6 px-4 space-y-2">

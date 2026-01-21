@@ -4,7 +4,7 @@ export interface NetworkStats {
   totalNodes: number;
   onlineNodes: number;
   offlineNodes: number;
-  healthScore: number; // 0-100 percentage of online nodes
+  healthScore: number;
   totalStorageUsed: string;
   versions: Record<string, number>;
   publicNodes: number;
@@ -27,7 +27,9 @@ export interface CreditsResponse {
 // In-memory cache for geo data (mirrors api/geo/route.ts cache)
 const geoCache = new Map<string, { country?: string; city?: string }>();
 
-async function fetchRpcData(): Promise<any> {
+async function fetchRpcData(network: string = 'mainnet'): Promise<any> {
+  const hostname = network === 'devnet' ? '173.212.207.32' : '216.234.134.4';
+
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
       jsonrpc: '2.0',
@@ -36,7 +38,7 @@ async function fetchRpcData(): Promise<any> {
     });
 
     const options = {
-      hostname: '173.212.207.32',
+      hostname: hostname,
       port: 6000,
       path: '/rpc',
       method: 'POST',
@@ -97,11 +99,11 @@ async function fetchGeoData(ips: string[]): Promise<Record<string, { country?: s
 
         if (response.ok) {
           const data = await response.json();
-           data.forEach((item: any) => {
-             const geo = { country: item.country, city: item.city };
-             geoCache.set(item.query, geo);
-             results[item.query] = geo;
-           });
+          data.forEach((item: any) => {
+            const geo = { country: item.country, city: item.city };
+            geoCache.set(item.query, geo);
+            results[item.query] = geo;
+          });
         }
       } catch (err) {
         console.error('Geo fetch error in bot-data:', err);
@@ -112,8 +114,8 @@ async function fetchGeoData(ips: string[]): Promise<Record<string, { country?: s
   return results;
 }
 
-export async function getNetworkStats(): Promise<NetworkStats> {
-  const data = await fetchRpcData();
+export async function getNetworkStats(network: string = 'mainnet'): Promise<NetworkStats> {
+  const data = await fetchRpcData(network);
   const pods = data.result?.pods || data.result?.value?.pods || [];
   
   const now = Date.now() / 1000;
@@ -206,9 +208,13 @@ export async function getNetworkStats(): Promise<NetworkStats> {
   };
 }
 
-export async function getPodCredits(): Promise<CreditsResponse> {
+export async function getPodCredits(network: string = 'mainnet'): Promise<CreditsResponse> {
+  const url = network === 'mainnet' 
+    ? 'https://podcredits.xandeum.network/api/mainnet-pod-credits'
+    : 'https://podcredits.xandeum.network/api/pods-credits';
+
   try {
-    const response = await fetch('https://podcredits.xandeum.network/api/pods-credits');
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch pod credits: ${response.status} ${response.statusText}`);
     }
@@ -216,9 +222,30 @@ export async function getPodCredits(): Promise<CreditsResponse> {
     return data;
   } catch (error) {
     console.error('Error fetching pod credits:', error);
-    // Return empty structure or rethrow depending on desired behavior. 
-    // For now, rethrowing so the helpful bot can report the error.
     throw error;
   }
 }
 
+export async function searchNodes(query: string, network: string = 'mainnet'): Promise<any[]> {
+  const data = await fetchRpcData(network);
+  const pods = data.result?.pods || data.result?.value?.pods || [];
+  const now = Date.now() / 1000;
+
+  // Filter pods
+  const lowerQuery = query.toLowerCase();
+  const matched = pods.filter((pod: any) => {
+    const pubkey = pod.pubkey?.toLowerCase() || '';
+    const ip = pod.address?.toLowerCase() || '';
+    return pubkey.includes(lowerQuery) || ip.includes(lowerQuery);
+  });
+
+  // map to cleaner format for bot
+  return matched.map((pod: any) => ({
+    pubkey: pod.pubkey,
+    ip: pod.address?.split(':')[0],
+    version: pod.version,
+    status: (now - pod.last_seen_timestamp) < 300 ? 'Online' : 'Offline',
+    storage_used: pod.storage_used,
+    is_public: pod.is_public
+  })).slice(0, 10); // Limit to 10 results to avoid context overflow
+}

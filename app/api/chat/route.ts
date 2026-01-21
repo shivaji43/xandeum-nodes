@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getNetworkStats, getPodCredits } from '@/lib/bot-data';
+import { getNetworkStats, getPodCredits, searchNodes } from '@/lib/bot-data';
 
 // System prompt
 const SYSTEM_PROMPT = `You are the XAND Bot, an AI assistant for the Xandeum Network.
@@ -11,6 +11,8 @@ ALWAYS use this tool to answer questions about:
 - Versions and Storage usage
 - Public vs Private nodes
 - Pod Credits (check credits for specific pods or list top pods)
+
+Use 'search_nodes' when the user asks about a specific node (by IP or PubKey).
 
 Definitions:
 - "Online": Node seen within the last 5 minutes.
@@ -34,7 +36,7 @@ Refuse to answer questions unrelated to Xandeum or general blockchain topics unl
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const { messages, network } = await req.json();
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
         type: "function",
         function: {
           name: "get_network_stats",
-          description: "Get comprehensive Xandeum network statistics including health score, top countries, cities, online/offline counts, etc.",
+          description: "Get comprehensive Xandeum network statistics including health score, top countries, cities, online/offline counts, etc. Use this for general network overviews.",
           parameters: {
             type: "object",
             properties: {},
@@ -64,6 +66,23 @@ export async function POST(req: Request) {
             properties: {},
           },
         },
+      },
+      {
+        type: "function",
+        function: {
+          name: "search_nodes",
+          description: "Search for specific nodes by Public Key or IP Address. Returns details like status, version, and storage.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The Public Key or IP address to search for."
+              }
+            },
+            required: ["query"]
+          },
+        },
       }
     ];
 
@@ -78,6 +97,7 @@ export async function POST(req: Request) {
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: `Current Network Context: ${network}` },
           ...messages
         ],
         tools: tools,
@@ -96,13 +116,13 @@ export async function POST(req: Request) {
 
     // Handle Tool Calls
     if (message.tool_calls) {
-      const toolCAlls = message.tool_calls;
+      const toolCalls = message.tool_calls;
       const functionResponseMessages = [];
 
-      for (const toolCall of toolCAlls) {
+      for (const toolCall of toolCalls) {
         if (toolCall.function.name === 'get_network_stats') {
           try {
-            const stats = await getNetworkStats();
+            const stats = await getNetworkStats(network);
             
             functionResponseMessages.push({
               tool_call_id: toolCall.id,
@@ -120,7 +140,7 @@ export async function POST(req: Request) {
           }
         } else if (toolCall.function.name === 'get_pod_credits') {
           try {
-            const credits = await getPodCredits();
+            const credits = await getPodCredits(network);
             
             functionResponseMessages.push({
               tool_call_id: toolCall.id,
@@ -134,6 +154,25 @@ export async function POST(req: Request) {
               role: "tool",
               name: "get_pod_credits",
               content: `Error fetching credits: ${e.message}`,
+            });
+          }
+        } else if (toolCall.function.name === 'search_nodes') {
+          try {
+            const args = JSON.parse(toolCall.function.arguments);
+            const nodes = await searchNodes(args.query, network);
+            
+            functionResponseMessages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "search_nodes",
+              content: JSON.stringify(nodes),
+            });
+          } catch (e: any) {
+             functionResponseMessages.push({
+              tool_call_id: toolCall.id,
+              role: "tool",
+              name: "search_nodes",
+              content: `Error searching nodes: ${e.message}`,
             });
           }
         }
@@ -150,6 +189,7 @@ export async function POST(req: Request) {
           model: 'gpt-4o',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: `Current Network Context: ${network}` },
             ...messages,
             message,
             ...functionResponseMessages

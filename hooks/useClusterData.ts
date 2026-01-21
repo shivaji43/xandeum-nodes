@@ -35,10 +35,8 @@ export function useClusterData() {
           status: (Date.now() / 1000) - pod.last_seen_timestamp < 300 ? 'Online' : 'Offline'
         }));
 
-        // Deduplicate nodes by pubkey
-        const uniqueNodes = Array.from(new Map(mappedNodes.map((node: any) => [node.pubkey, node])).values());
-        
-        setNodes(uniqueNodes as ClusterNode[]);
+        // Show all nodes including duplicates as requested
+        setNodes(mappedNodes as ClusterNode[]);
         
         setError('');
         setLastUpdated(new Date().toLocaleTimeString());

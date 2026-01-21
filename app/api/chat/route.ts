@@ -43,7 +43,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing OpenAI API Key' }, { status: 500 });
     }
 
-    // Tools definition
     const tools = [
       {
         type: "function",
@@ -86,7 +85,6 @@ export async function POST(req: Request) {
       }
     ];
 
-    // First call to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -106,7 +104,6 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
-    
     if (data.error) {
        console.error("OpenAI Error:", data.error);
        return NextResponse.json({ error: data.error.message }, { status: 500 });
@@ -114,7 +111,6 @@ export async function POST(req: Request) {
 
     const message = data.choices[0].message;
 
-    // Handle Tool Calls
     if (message.tool_calls) {
       const toolCalls = message.tool_calls;
       const functionResponseMessages = [];
@@ -123,7 +119,6 @@ export async function POST(req: Request) {
         if (toolCall.function.name === 'get_network_stats') {
           try {
             const stats = await getNetworkStats(network);
-            
             functionResponseMessages.push({
               tool_call_id: toolCall.id,
               role: "tool",
@@ -141,7 +136,6 @@ export async function POST(req: Request) {
         } else if (toolCall.function.name === 'get_pod_credits') {
           try {
             const credits = await getPodCredits(network);
-            
             functionResponseMessages.push({
               tool_call_id: toolCall.id,
               role: "tool",
@@ -160,7 +154,6 @@ export async function POST(req: Request) {
           try {
             const args = JSON.parse(toolCall.function.arguments);
             const nodes = await searchNodes(args.query, network);
-            
             functionResponseMessages.push({
               tool_call_id: toolCall.id,
               role: "tool",
@@ -178,7 +171,6 @@ export async function POST(req: Request) {
         }
       }
 
-      // Second call to OpenAI with tool outputs
       const secondResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {

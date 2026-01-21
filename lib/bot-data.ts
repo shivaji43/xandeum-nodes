@@ -24,7 +24,6 @@ export interface CreditsResponse {
   status: string;
 }
 
-// In-memory cache for geo data (mirrors api/geo/route.ts cache)
 const geoCache = new Map<string, { country?: string; city?: string }>();
 
 async function fetchRpcData(network: string = 'mainnet'): Promise<any> {
@@ -74,7 +73,6 @@ async function fetchGeoData(ips: string[]): Promise<Record<string, { country?: s
   const results: Record<string, { country?: string; city?: string }> = {};
   const missingIps: string[] = [];
 
-  // Check cache
   for (const ip of ips) {
     if (geoCache.has(ip)) {
       results[ip] = geoCache.get(ip)!;
@@ -83,14 +81,11 @@ async function fetchGeoData(ips: string[]): Promise<Record<string, { country?: s
     }
   }
 
-  // Fetch missing
   if (missingIps.length > 0) {
     const batchSize = 100;
     for (let i = 0; i < missingIps.length; i += batchSize) {
       const batch = missingIps.slice(i, i + batchSize);
       try {
-        // Use ip-api.com directly as requested to avoid circular dependency on app route
-        // We use fetch here, assuming node environment supports it (Node 18+)
         const response = await fetch('http://ip-api.com/batch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -131,11 +126,9 @@ export async function getNetworkStats(network: string = 'mainnet'): Promise<Netw
   const uniqueNodes = new Map();
   const uniqueIps = new Set<string>();
 
-  // Deduplicate
   pods.forEach((pod: any) => {
     if (!uniqueNodes.has(pod.pubkey)) {
       uniqueNodes.set(pod.pubkey, pod);
-      // Extract IP (naive check assuming host:port or just host)
       const ip = pod.address?.split(':')[0];
       if (ip && ip !== '127.0.0.1' && ip !== '0.0.0.0') {
         uniqueIps.add(ip);
@@ -143,25 +136,19 @@ export async function getNetworkStats(network: string = 'mainnet'): Promise<Netw
     }
   });
 
-  // Fetch Geo Data
   const ipMap = await fetchGeoData(Array.from(uniqueIps));
 
   uniqueNodes.forEach((node) => {
-    // Status
     const isOnline = (now - node.last_seen_timestamp) < 300;
     if (isOnline) onlineCount++; else offlineCount++;
 
-    // Public/Private
     if (node.is_public) publicCount++; else privateCount++;
 
-    // Storage
     if (node.storage_used) totalStorage += node.storage_used;
 
-    // Versions
     const ver = node.version || 'Unknown';
     versionCounts[ver] = (versionCounts[ver] || 0) + 1;
 
-    // Geo Stats
     const ip = node.address?.split(':')[0];
     if (ip && ipMap[ip]) {
       const { country, city } = ipMap[ip];
@@ -170,18 +157,14 @@ export async function getNetworkStats(network: string = 'mainnet'): Promise<Netw
     }
   });
 
-  // Sort Top Countries
   const sortedCountries = Object.fromEntries(
     Object.entries(countryCounts).sort(([,a], [,b]) => b - a).slice(0, 5)
   );
 
-   // Sort Top Cities
    const sortedCities = Object.fromEntries(
     Object.entries(cityCounts).sort(([,a], [,b]) => b - a).slice(0, 5)
   );
 
-
-  // Format Storage
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -231,7 +214,6 @@ export async function searchNodes(query: string, network: string = 'mainnet'): P
   const pods = data.result?.pods || data.result?.value?.pods || [];
   const now = Date.now() / 1000;
 
-  // Filter pods
   const lowerQuery = query.toLowerCase();
   const matched = pods.filter((pod: any) => {
     const pubkey = pod.pubkey?.toLowerCase() || '';
@@ -239,7 +221,6 @@ export async function searchNodes(query: string, network: string = 'mainnet'): P
     return pubkey.includes(lowerQuery) || ip.includes(lowerQuery);
   });
 
-  // map to cleaner format for bot
   return matched.map((pod: any) => ({
     pubkey: pod.pubkey,
     ip: pod.address?.split(':')[0],
@@ -247,5 +228,5 @@ export async function searchNodes(query: string, network: string = 'mainnet'): P
     status: (now - pod.last_seen_timestamp) < 300 ? 'Online' : 'Offline',
     storage_used: pod.storage_used,
     is_public: pod.is_public
-  })).slice(0, 10); // Limit to 10 results to avoid context overflow
+  })).slice(0, 10); 
 }

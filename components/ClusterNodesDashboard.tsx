@@ -184,7 +184,6 @@ export default function ClusterNodesDashboard({
     <div className="p-6 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img src="/xandeum.png" alt="Xandeum Logo" className="h-20 w-20" />
@@ -204,7 +203,6 @@ export default function ClusterNodesDashboard({
           </div>
         </div>
 
-        {/* World Map */}
         {!hideMap && (
           <WorldMap 
             points={mapPoints} 
@@ -227,7 +225,6 @@ export default function ClusterNodesDashboard({
 
 
 
-        {/* Stats Cards */}
         {!hideStats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
@@ -344,7 +341,6 @@ export default function ClusterNodesDashboard({
           </div>
         </div>
 
-        {/* Data Table */}
         <div className="rounded-md border bg-card">
           <Table>
             <TableHeader>

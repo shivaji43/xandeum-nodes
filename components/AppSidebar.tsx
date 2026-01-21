@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Network, Settings, Box, Coins, ChevronLeft, ChevronRight, Trophy, Star, Sparkles } from 'lucide-react';
+import { Home, Network, Box, Coins, ChevronLeft, ChevronRight, Trophy, Star, Sparkles } from 'lucide-react';
 import { FaGlobe, FaDiscord } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
@@ -27,8 +27,6 @@ export function AppSidebar() {
     { name: 'Watchlist', href: '/watchlist', icon: Star },
     { name: 'XAND Bot', href: '/chat', icon: Sparkles },
     { name: 'Trade / Stake', href: '/trade', icon: Coins },
-    // { name: 'Nodes', href: '/nodes', icon: Box },
-    // { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   return (

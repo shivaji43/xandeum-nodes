@@ -35,6 +35,7 @@ import { useClusterData } from '@/hooks/useClusterData';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { Star } from 'lucide-react';
 import HomeStats from './HomeStats';
+import Image from 'next/image';
 
 
 export default function ClusterNodesDashboard({ 
@@ -186,7 +187,8 @@ export default function ClusterNodesDashboard({
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <img src="/xandeum.png" alt="Xandeum Logo" className="h-20 w-20" />
+
+            <Image src="/xandeum.png" alt="Xandeum Logo" width={80} height={80} className="h-20 w-20" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-foreground">Xandeum Network</h1>
               <p className="text-muted-foreground mt-1">

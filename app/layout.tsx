@@ -3,6 +3,9 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/next"
+import { AppSidebar } from "@/components/AppSidebar";
+import { WalletContextProvider } from "@/components/WalletContextProvider";
+import { NetworkProvider } from "@/components/NetworkContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,14 +23,46 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Xandeum Explorer",
-  description: "Xandeum pNode Explorer",
+  title: {
+    default: "Xandeum pNode Explorer",
+    template: "%s | Xandeum Explorer",
+  },
+  description: "Explore the Xandeum network, monitor pNode status, check leaderboard rankings, and track network health in real-time.",
+  applicationName: "Xandeum Explorer",
+  authors: [{ name: "Xandeum Team", url: "https://xandeum.com" }],
+  generator: "Next.js",
+  keywords: ["Xandeum", "Solana", "Storage", "Nodes", "Explorer", "Crypto", "Blockchain", "pNode", "DePIN"],
+  referrer: "origin-when-cross-origin",
+  creator: "Xandeum",
+  publisher: "Xandeum",
+  metadataBase: new URL("https://xandeum-pnode-explorer.vercel.app"),
+  openGraph: {
+    title: "Xandeum pNode Explorer",
+    description: "Real-time monitoring and analytics for the Xandeum storage network.",
+    url: "https://xandeum-pnode-explorer.vercel.app",
+    siteName: "Xandeum Explorer",
+    images: [
+      {
+        url: "/og-image.png", // We'll need to make sure this exists or use a default one
+        width: 1200,
+        height: 630,
+        alt: "Xandeum Explorer Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Xandeum pNode Explorer",
+    description: "Monitor Xandeum pNodes, track network stats, and view leaderboards.",
+    creator: "@Xandeum", // Assuming this is the handle
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
-
-import { AppSidebar } from "@/components/AppSidebar";
-import { WalletContextProvider } from "@/components/WalletContextProvider";
-
-import { NetworkProvider } from "@/components/NetworkContext";
 
 export default function RootLayout({
   children,

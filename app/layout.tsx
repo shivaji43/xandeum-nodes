@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { AppSidebar } from "@/components/AppSidebar";
 import { WalletContextProvider } from "@/components/WalletContextProvider";
 import { NetworkProvider } from "@/components/NetworkContext";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -88,6 +89,7 @@ export default function RootLayout({
                 <main className="flex-1 overflow-y-auto bg-background">
                   {children}
                   <Analytics />
+                  <SpeedInsights />
                 </main>
               </div>
             </WalletContextProvider>

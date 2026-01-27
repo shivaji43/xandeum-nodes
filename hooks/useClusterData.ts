@@ -87,22 +87,41 @@ export function useClusterData() {
             body: JSON.stringify(uniqueIps),
           });
 
+
           if (response.ok) {
             const data = await response.json();
-            const points = data
-              .map((item: any) => {
-                // Find all nodes associated with this IP
-                const associatedNodes = nodes.filter(n => n.address?.startsWith(item.query));
-                return {
+            
+            // Map to store combined points by "lat,lon" key
+            const pointsMap = new Map<string, { lat: number; lon: number; label: string; nodes: ClusterNode[]; country?: string; city?: string }>();
+
+            data.forEach((item: any) => {
+              // Find all nodes associated with this IP
+              const associatedNodes = nodes.filter(n => n.address?.startsWith(item.query));
+              
+              const key = `${item.lat},${item.lon}`;
+              
+              if (pointsMap.has(key)) {
+                // If point exists, append nodes
+                const existingPoint = pointsMap.get(key)!;
+                if (associatedNodes.length > 0) {
+                   existingPoint.nodes.push(...associatedNodes);
+                   // Optionally update label or other metadata if needed, 
+                   // but usually location info (country/city) is same for same lat/lon
+                }
+              } else {
+                // Create new point
+                 pointsMap.set(key, {
                   lat: item.lat,
                   lon: item.lon,
-                  label: item.query,
-                  nodes: associatedNodes, // Changed from single node to array
+                  label: item.query, // This might be just one IP, but that's okay for label
+                  nodes: [...associatedNodes], // Create a new array
                   country: item.country,
                   city: item.city
-                };
-              });
-            allPoints.push(...points);
+                });
+              }
+            });
+            
+            allPoints.push(...Array.from(pointsMap.values()));
           }
           
           setMapPoints(allPoints);

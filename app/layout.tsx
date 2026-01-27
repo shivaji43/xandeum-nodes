@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: "Xandeum Explorer",
     images: [
       {
-        url: "/og-image.png", // We'll need to make sure this exists or use a default one
+        url: "/og-image.png", 
         width: 1200,
         height: 630,
         alt: "Xandeum Explorer Preview",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Xandeum pNode Explorer",
     description: "Monitor Xandeum pNodes, track network stats, and view leaderboards.",
-    creator: "@Xandeum", // Assuming this is the handle
+    creator: "@Xandeum",    // Assuming this is the handle
     images: ["/og-image.png"],
   },
   icons: {

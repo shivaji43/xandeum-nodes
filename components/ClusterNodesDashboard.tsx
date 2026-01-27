@@ -562,8 +562,8 @@ export default function ClusterNodesDashboard({
       {/* Node Selection Modal (Cluster View) */}
       {selectedNodes && !selectedNode && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={handleCloseModal}>
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <CardHeader className="flex flex-row items-center justify-between sticky top-0 bg-card z-10 border-b">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto p-0 gap-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" onClick={e => e.stopPropagation()}>
+            <CardHeader className="flex flex-row items-center justify-between sticky top-0 bg-card z-10 border-b p-4">
               <div>
                 <CardTitle className="text-xl">Cluster Nodes</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">

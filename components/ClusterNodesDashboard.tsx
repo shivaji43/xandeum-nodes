@@ -416,7 +416,10 @@ export default function ClusterNodesDashboard({
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => handleCopy(node.pubkey || '')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopy(node.pubkey || '');
+                          }}
                         >
                           {copiedKey === node.pubkey ? (
                             <Check className="h-3 w-3 text-emerald-500" />
